@@ -1,4 +1,4 @@
-# Game News Tracker
+# Patchwork
 
 A static site on GitHub Pages that collects patch notes and announcements for the games I play.
 A GitHub Actions workflow fetches the news every 3 hours and redeploys the site — no server, no API keys.
