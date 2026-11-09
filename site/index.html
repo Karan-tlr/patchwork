@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Game News Tracker</title>
+  <meta name="description" content="Latest patch notes and announcements for the games I play.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <div class="title-row">
+        <h1>Game News</h1>
+        <p class="updated" id="updated"></p>
+      </div>
+      <div class="controls">
+        <input id="search" type="search" placeholder="Search news…" aria-label="Search news">
+        <select id="type" aria-label="Filter by type"><option value="">All types</option></select>
+      </div>
+      <nav class="chips" id="chips" aria-label="Filter by game"></nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <p class="status" id="status">Loading…</p>
+    <ol class="feed" id="feed"></ol>
+  </main>
+
+  <footer class="wrap foot">
+    Updates automatically every few hours. Edit <code>games.json</code> to change the list.
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

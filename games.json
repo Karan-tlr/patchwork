@@ -1,0 +1,27 @@
+{
+  "_help": "See README.md for every option. 'steamAppId' is the number in the game's Steam store URL. 'feeds' takes RSS/Atom URLs. 'noSteamNews' uses Steam only for the cover image.",
+  "itemsPerGame": 20,
+  "games": [
+    {
+      "name": "Warframe",
+      "steamAppId": 230410,
+      "officialOnly": true
+    },
+    {
+      "name": "MapleStory",
+      "steamAppId": 216150,
+      "noSteamNews": true,
+      "maplestory": {
+        "categories": ["update", "events"],
+        "sunnySundays": true,
+        "classicWorld": false
+      }
+    },
+    {
+      "name": "Final Fantasy XIV",
+      "steamAppId": 39210,
+      "noSteamNews": true,
+      "feeds": ["https://na.finalfantasyxiv.com/lodestone/news/topics.xml"]
+    }
+  ]
+}
