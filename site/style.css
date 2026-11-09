@@ -127,6 +127,48 @@ main > * + * { margin-top: var(--space-3); }
 .entry { padding-block: var(--space-2); border-bottom: 1px dotted var(--color-border); }
 .entry:last-child { border-bottom: 0; }
 
+/* Small framed thumbnail beside the text, like an old blog index. */
+.entry.has-thumb {
+  display: grid;
+  grid-template-columns: 7.5rem 1fr;
+  gap: var(--space-2);
+  align-items: start;
+}
+.entry-body { min-width: 0; }
+.entry-thumb {
+  display: block;
+  margin-top: 0.3rem;
+  padding: 3px;
+  background: var(--color-bg-soft);
+  border: 1px solid var(--color-border);
+  border-radius: 0.3rem;
+}
+.entry-thumb img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 0.15rem;
+  /* Muted so the art sits quietly in the palette... */
+  filter: grayscale(0.85) sepia(0.15);
+  opacity: 0.75;
+  transition: filter 0.25s ease, opacity 0.25s ease;
+}
+.entry-thumb { transition: border-color 0.25s ease; }
+/* ...and back to full colour while that post is hovered or focused. */
+.entry:hover .entry-thumb img,
+.entry:focus-within .entry-thumb img { filter: none; opacity: 1; }
+.entry:hover .entry-thumb,
+.entry:focus-within .entry-thumb { border-color: var(--color-accent); }
+
+@media (prefers-reduced-motion: reduce) {
+  .entry-thumb, .entry-thumb img { transition: none; }
+}
+
+@media (max-width: 30rem) {
+  .entry.has-thumb { grid-template-columns: 4.5rem 1fr; gap: 0.75rem; }
+  .entry-thumb img { aspect-ratio: 1; }
+}
+
 .entry-meta {
   font-family: var(--font-mono);
   font-size: 0.75rem;

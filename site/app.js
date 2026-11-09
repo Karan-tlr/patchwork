@@ -96,17 +96,26 @@ function render() {
   $("feed").replaceChildren(
     ...shown.slice(0, 150).map((i) => {
       const future = i.date > Date.now();
-      return el("li", { class: "entry" },
-        el("div", { class: "entry-meta" },
-          el("span", { class: "game" }, i.game), " · ",
-          el("time", { datetime: new Date(i.date).toISOString(), title: ago(i.date) }, shortDate(i.date, i.tags.includes("Sunny Sunday"))),
-          future ? el("span", { class: "soon" }, " · upcoming")
-            : i.date > lastVisit && el("span", { class: "new" }, " · new!")
-        ),
-        el("h2", { class: "entry-title" }, el("a", { href: i.url, target: "_blank", rel: "noopener" }, i.title)),
-        i.summary && el("p", {}, i.summary),
-        i.game === TYPED_GAME && i.tags.length > 0 && el("div", { class: "entry-tags" },
-          ...i.tags.map((t) => el("span", { class: t === "Sunny Sunday" ? "tag sunny" : "tag" }, t.toLowerCase())))
+      // Posts without their own picture simply get no thumbnail column.
+      const thumb = i.image && el("a", { class: "entry-thumb", href: i.url, target: "_blank", rel: "noopener", tabindex: "-1", "aria-hidden": "true" },
+        el("img", {
+          src: i.image, alt: "", loading: "lazy", decoding: "async",
+          onerror: (e) => { const li = e.target.closest(".entry"); e.target.parentElement.remove(); li?.classList.remove("has-thumb"); },
+        }));
+      return el("li", { class: thumb ? "entry has-thumb" : "entry" },
+        thumb,
+        el("div", { class: "entry-body" },
+          el("div", { class: "entry-meta" },
+            el("span", { class: "game" }, i.game), " · ",
+            el("time", { datetime: new Date(i.date).toISOString(), title: ago(i.date) }, shortDate(i.date, i.tags.includes("Sunny Sunday"))),
+            future ? el("span", { class: "soon" }, " · upcoming")
+              : i.date > lastVisit && el("span", { class: "new" }, " · new!")
+          ),
+          el("h2", { class: "entry-title" }, el("a", { href: i.url, target: "_blank", rel: "noopener" }, i.title)),
+          i.summary && el("p", {}, i.summary),
+          i.game === TYPED_GAME && i.tags.length > 0 && el("div", { class: "entry-tags" },
+            ...i.tags.map((t) => el("span", { class: t === "Sunny Sunday" ? "tag sunny" : "tag" }, t.toLowerCase())))
+        )
       );
     })
   );
