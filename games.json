@@ -22,6 +22,11 @@
       "steamAppId": 39210,
       "noSteamNews": true,
       "feeds": ["https://na.finalfantasyxiv.com/lodestone/news/topics.xml"]
+    },
+    {
+      "name": "Deadlock",
+      "steamAppId": 1422450,
+      "officialOnly": true
     }
   ]
 }
