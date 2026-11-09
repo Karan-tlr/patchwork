@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" role="img" aria-label="Henna flower mark">
+	<style>
+		.petal, .center { fill: #4f7c62; }
+		@media (prefers-color-scheme: dark) {
+			.petal, .center { fill: #8fc3a4; }
+		}
+	</style>
+	<g transform="translate(20 20)">
+		<g class="petal">
+			<ellipse rx="4.2" ry="9" cy="-9.5" />
+		</g>
+		<g class="petal" transform="rotate(60)">
+			<ellipse rx="4.2" ry="9" cy="-9.5" />
+		</g>
+		<g class="petal" transform="rotate(120)">
+			<ellipse rx="4.2" ry="9" cy="-9.5" />
+		</g>
+		<g class="petal" transform="rotate(180)">
+			<ellipse rx="4.2" ry="9" cy="-9.5" />
+		</g>
+		<g class="petal" transform="rotate(240)">
+			<ellipse rx="4.2" ry="9" cy="-9.5" />
+		</g>
+		<g class="petal" transform="rotate(300)">
+			<ellipse rx="4.2" ry="9" cy="-9.5" />
+		</g>
+		<circle class="center" r="3.4" />
+	</g>
+</svg>
