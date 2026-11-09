@@ -153,7 +153,9 @@ async function mapleStoryNews(opts) {
       if (!r.ok) continue;
       for (const s of parseSunnySundays(await r.json())) if (!sunny.has(s.id)) sunny.set(s.id, s);
     }
-    items.push(...sunny.values());
+    // Older Sundays are just clutter: keep the last four weeks plus anything upcoming.
+    const cutoff = Date.now() - 28 * 86400e3;
+    items.push(...[...sunny.values()].filter((s) => s.date >= cutoff));
   }
   return items;
 }
@@ -174,17 +176,9 @@ for (const game of config.games) {
       errors.push(`${game.name} (${label}): ${e.message}`);
     }
   }
-  // Sources without categories get a best-guess tag from the title.
-  for (const i of items) {
-    if (i.tags.length) continue;
-    if (/patch notes|\bpatch \d|hotfix|\bupdate \d|release notes/i.test(i.title)) i.tags = ["Patch notes"];
-    else if (/\bevents?\b|\bbegins\b|\breturns\b|collaboration|campaign|baro ki'teer/i.test(i.title)) i.tags = ["Event"];
-    else if (/maintenance/i.test(i.title)) i.tags = ["Maintenance"];
-  }
-
   const seen = new Set();
   const unique = items
-    .filter((i) => i.url && !seen.has(i.url) && seen.add(i.url))
+    .filter((i) => i.url && !seen.has(i.id) && seen.add(i.id))
     .sort((a, b) => b.date - a.date);
 
   games.push({

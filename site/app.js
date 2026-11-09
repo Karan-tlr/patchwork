@@ -4,13 +4,35 @@ const store = {
   set(k, v) { try { localStorage.setItem(k, v); } catch {} },
 };
 
-// Items newer than the previous visit get a "New" badge.
+// ---- light/dark toggle (shares the "theme" key with karan-tlr.github.io) ----
+(() => {
+  const root = document.documentElement;
+  const button = $("themeToggle");
+  const media = matchMedia("(prefers-color-scheme: dark)");
+  const effective = () => root.dataset.theme || (media.matches ? "dark" : "light");
+  const reflect = () => {
+    const dark = effective() === "dark";
+    button.setAttribute("aria-pressed", String(dark));
+    button.setAttribute("aria-label", dark ? "Switch to light theme" : "Switch to dark theme");
+  };
+  button.addEventListener("click", () => {
+    root.dataset.theme = effective() === "dark" ? "light" : "dark";
+    store.set("theme", root.dataset.theme);
+    reflect();
+  });
+  media.addEventListener("change", () => { if (!root.dataset.theme) reflect(); });
+  reflect();
+})();
+
+// Items newer than the previous visit are marked "new!".
 const lastVisit = Number(store.get("lastVisit")) || Date.now();
 store.set("lastVisit", String(Date.now()));
 
-const state = { game: store.get("game") || "All", query: "", type: store.get("type") || "" };
+const state = { game: store.get("game") || "all", type: store.get("type") || "all", query: "" };
 let items = [];
 let gameNames = [];
+let typeNames = [];
+const TYPED_GAME = "MapleStory";
 
 const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
 function ago(ms) {
@@ -19,6 +41,9 @@ function ago(ms) {
   for (const [u, n] of units) if (Math.abs(s) >= n) return rtf.format(Math.round(s / n), u);
   return "just now";
 }
+// Sunny Sunday dates are whole UTC days; show them as-is rather than shifting into the local zone.
+const shortDate = (ms, utc) =>
+  new Date(ms).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric", timeZone: utc ? "UTC" : undefined });
 
 function el(tag, attrs = {}, ...kids) {
   const e = document.createElement(tag);
@@ -31,55 +56,59 @@ function el(tag, attrs = {}, ...kids) {
   return e;
 }
 
-function renderChips() {
-  const counts = { All: items.length };
+// A row of text links separated by " · ", like an old homepage nav.
+function linkRow(target, names, key, counts, fresh) {
+  const parts = [];
+  ["all", ...names].forEach((name, i) => {
+    if (i) parts.push(el("span", { class: "sep", "aria-hidden": "true" }, " · "));
+    parts.push(
+      el("button", {
+        class: "filter", type: "button", "aria-pressed": String(state[key] === name),
+        onclick: () => { state[key] = name; store.set(key, name); render(); },
+      }, name.toLowerCase()),
+      counts && el("span", { class: "count" }, ` ${counts[name] || 0}`),
+      fresh?.[name] && el("span", { class: "fresh", title: "new since your last visit" }, "*")
+    );
+  });
+  $(target).replaceChildren(...parts.filter(Boolean));
+}
+
+function render() {
+  const counts = { all: items.length };
   const fresh = {};
   for (const i of items) {
     counts[i.game] = (counts[i.game] || 0) + 1;
-    if (i.date > lastVisit) fresh[i.game] = fresh.All = true;
+    if (i.date > lastVisit && i.date <= Date.now()) fresh[i.game] = fresh.all = true;
   }
-  $("chips").replaceChildren(
-    ...["All", ...gameNames].map((name) =>
-      el("button", {
-        class: "chip", type: "button", "aria-pressed": String(state.game === name),
-        onclick: () => { state.game = name; store.set("game", name); renderChips(); renderFeed(); },
-      },
-        fresh[name] && el("span", { class: "dot", title: "New since your last visit" }),
-        name, el("span", { class: "count" }, String(counts[name] || 0)))
-    )
-  );
-}
+  linkRow("games", gameNames, "game", counts, fresh);
+  // Only MapleStory's news comes with real categories, so "type" only appears there.
+  const typed = state.game === TYPED_GAME;
+  $("typeRow").hidden = !typed;
+  if (typed) linkRow("types", typeNames, "type");
 
-function renderFeed() {
   const q = state.query.toLowerCase();
   const shown = items.filter((i) =>
-    (state.game === "All" || i.game === state.game) &&
-    (!state.type || i.tags.includes(state.type)) &&
+    (state.game === "all" || i.game === state.game) &&
+    (!typed || state.type === "all" || i.tags.includes(state.type)) &&
     (!q || (i.title + " " + i.summary + " " + i.game).toLowerCase().includes(q))
   );
-  $("status").textContent = shown.length ? "" : "No news matches.";
+  $("status").textContent = shown.length ? "" : "Nothing here yet.";
   $("feed").replaceChildren(
-    ...shown.slice(0, 150).map((i) =>
-      el("li", {},
-        el("a", { class: "card", href: i.url, target: "_blank", rel: "noopener" },
-          el("img", {
-            class: "thumb", src: i.image || i.gameImage || "", alt: "", loading: "lazy",
-            onerror: (e) => { if (i.gameImage && e.target.src !== i.gameImage) e.target.src = i.gameImage; },
-          }),
-          el("div", {},
-            el("div", { class: "meta" },
-              el("span", { class: "game" }, i.game),
-              el("time", { datetime: new Date(i.date).toISOString(), title: new Date(i.date).toLocaleString() }, ago(i.date)),
-              i.date > Date.now() ? el("span", { class: "badge soon" }, "Upcoming")
-                : i.date > lastVisit && el("span", { class: "badge new" }, "New"),
-              ...i.tags.map((t) => el("span", { class: t === "Sunny Sunday" ? "badge sunny" : "badge" }, t))
-            ),
-            el("h2", {}, i.title),
-            i.summary && el("p", {}, i.summary)
-          )
-        )
-      )
-    )
+    ...shown.slice(0, 150).map((i) => {
+      const future = i.date > Date.now();
+      return el("li", { class: "entry" },
+        el("div", { class: "entry-meta" },
+          el("span", { class: "game" }, i.game), " · ",
+          el("time", { datetime: new Date(i.date).toISOString(), title: ago(i.date) }, shortDate(i.date, i.tags.includes("Sunny Sunday"))),
+          future ? el("span", { class: "soon" }, " · upcoming")
+            : i.date > lastVisit && el("span", { class: "new" }, " · new!")
+        ),
+        el("h2", { class: "entry-title" }, el("a", { href: i.url, target: "_blank", rel: "noopener" }, i.title)),
+        i.summary && el("p", {}, i.summary),
+        i.game === TYPED_GAME && i.tags.length > 0 && el("div", { class: "entry-tags" },
+          ...i.tags.map((t) => el("span", { class: t === "Sunny Sunday" ? "tag sunny" : "tag" }, t.toLowerCase())))
+      );
+    })
   );
 }
 
@@ -90,23 +119,18 @@ async function load() {
     const data = await res.json();
     gameNames = data.games.map((g) => g.name);
     items = data.games
-      .flatMap((g) => g.items.map((i) => ({ ...i, game: g.name, gameImage: g.image })))
+      .flatMap((g) => g.items.map((i) => ({ ...i, game: g.name })))
       .sort((a, b) => b.date - a.date);
-    if (!gameNames.includes(state.game)) state.game = "All";
-    const types = [...new Set(items.flatMap((i) => i.tags))].sort();
-    if (!types.includes(state.type)) state.type = "";
-    $("type").append(...types.map((t) => el("option", { value: t }, t)));
-    $("type").value = state.type;
-    const upd = $("updated");
-    upd.textContent = `Updated ${ago(data.updated)}`;
-    upd.title = new Date(data.updated).toLocaleString();
-    renderChips();
-    renderFeed();
-  } catch (e) {
+    typeNames = [...new Set(items.filter((i) => i.game === TYPED_GAME).flatMap((i) => i.tags))].sort();
+    if (!gameNames.includes(state.game)) state.game = "all";
+    if (!typeNames.includes(state.type)) state.type = "all";
+    $("updated").textContent = `last stitched ${ago(data.updated)}`;
+    $("updated").title = new Date(data.updated).toLocaleString();
+    render();
+  } catch {
     $("status").textContent = "Couldn't load news yet. If this is a fresh deploy, wait for the first workflow run.";
   }
 }
 
-$("search").addEventListener("input", (e) => { state.query = e.target.value.trim(); renderFeed(); });
-$("type").addEventListener("change", (e) => { state.type = e.target.value; store.set("type", state.type); renderFeed(); });
+$("search").addEventListener("input", (e) => { state.query = e.target.value.trim(); render(); });
 load();

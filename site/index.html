@@ -2,34 +2,56 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>
+    // Same "theme" key as karan-tlr.github.io, so both sites share the setting.
+    try { var t = localStorage.getItem("theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
   <title>Patchwork</title>
-  <meta name="description" content="Latest patch notes and announcements for the games I play.">
+  <meta name="description" content="Patch notes, events and news for the games I play.">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#f6ead0" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#171310" media="(prefers-color-scheme: dark)">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="https://karan-tlr.github.io/css/fonts.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="top">
-    <div class="wrap">
-      <div class="title-row">
-        <h1>Patchwork</h1>
-        <p class="updated" id="updated"></p>
-      </div>
-      <div class="controls">
-        <input id="search" type="search" placeholder="Search news…" aria-label="Search news">
-        <select id="type" aria-label="Filter by type"><option value="">All types</option></select>
-      </div>
-      <nav class="chips" id="chips" aria-label="Filter by game"></nav>
-    </div>
+  <header class="site-header">
+    <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" /></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2" /><path d="M12 2.5v2.4M12 19.1v2.4M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7" /></svg>
+    </button>
   </header>
 
-  <main class="wrap">
-    <p class="status" id="status">Loading…</p>
-    <ol class="feed" id="feed"></ol>
+  <main>
+    <section class="intro">
+      <p>Patch notes, events and news for the games I play, stitched together and refreshed every few hours.</p>
+      <svg class="divider" viewBox="0 0 240 16" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" aria-hidden="true">
+        <path d="M4 8c8-6 16 6 24 0s16-6 24 0 16 6 24 0 16-6 24 0 16 6 24 0 16-6 24 0 16 6 24 0 16-6 24 0 16 6 24 0 16-6 20 0" />
+        <circle cx="12" cy="8" r="1" fill="currentColor" stroke="none" /><circle cx="60" cy="8" r="1" fill="currentColor" stroke="none" />
+        <circle cx="108" cy="8" r="1" fill="currentColor" stroke="none" /><circle cx="156" cy="8" r="1" fill="currentColor" stroke="none" />
+        <circle cx="204" cy="8" r="1" fill="currentColor" stroke="none" />
+      </svg>
+    </section>
+
+    <section class="filters" aria-label="Filters">
+      <p><span class="label">game:</span> <span id="games"></span></p>
+      <p id="typeRow" hidden><span class="label">type:</span> <span id="types"></span></p>
+      <p><input id="search" type="search" placeholder="search…" aria-label="Search news"></p>
+    </section>
+
+    <section>
+      <p class="status" id="status">Loading…</p>
+      <ol class="entry-list" id="feed"></ol>
+    </section>
   </main>
 
-  <footer class="wrap foot">
-    Updates automatically every few hours. Edit <code>games.json</code> to change the list.
+  <footer class="site-footer">
+    <small id="updated"></small><br>
+    <a href="https://karan-tlr.github.io/">home</a>
+    <span aria-hidden="true"> &bull; </span>
+    <a href="https://github.com/Karan-tlr/game-news-tracker">source</a>
   </footer>
 
   <script src="app.js"></script>
