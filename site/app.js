@@ -28,7 +28,7 @@ const store = {
 const lastVisit = Number(store.get("lastVisit")) || Date.now();
 store.set("lastVisit", String(Date.now()));
 
-const state = { game: store.get("game") || "all", type: store.get("type") || "all", query: "" };
+const state = { game: store.get("game"), type: store.get("type") || "all", query: "" };
 let items = [];
 let gameNames = [];
 let typeNames = [];
@@ -59,7 +59,7 @@ function el(tag, attrs = {}, ...kids) {
 // A row of text links separated by " · ", like an old homepage nav.
 function linkRow(target, names, key, counts, fresh) {
   const parts = [];
-  ["all", ...names].forEach((name, i) => {
+  names.forEach((name, i) => {
     if (i) parts.push(el("span", { class: "sep", "aria-hidden": "true" }, " · "));
     parts.push(
       el("button", {
@@ -74,21 +74,21 @@ function linkRow(target, names, key, counts, fresh) {
 }
 
 function render() {
-  const counts = { all: items.length };
+  const counts = {};
   const fresh = {};
   for (const i of items) {
     counts[i.game] = (counts[i.game] || 0) + 1;
-    if (i.date > lastVisit && i.date <= Date.now()) fresh[i.game] = fresh.all = true;
+    if (i.date > lastVisit && i.date <= Date.now()) fresh[i.game] = true;
   }
   linkRow("games", gameNames, "game", counts, fresh);
   // Only MapleStory's news comes with real categories, so "type" only appears there.
   const typed = state.game === TYPED_GAME;
   $("typeRow").hidden = !typed;
-  if (typed) linkRow("types", typeNames, "type");
+  if (typed) linkRow("types", ["all", ...typeNames], "type");
 
   const q = state.query.toLowerCase();
   const shown = items.filter((i) =>
-    (state.game === "all" || i.game === state.game) &&
+    i.game === state.game &&
     (!typed || state.type === "all" || i.tags.includes(state.type)) &&
     (!q || (i.title + " " + i.summary + " " + i.game).toLowerCase().includes(q))
   );
@@ -122,7 +122,7 @@ async function load() {
       .flatMap((g) => g.items.map((i) => ({ ...i, game: g.name })))
       .sort((a, b) => b.date - a.date);
     typeNames = [...new Set(items.filter((i) => i.game === TYPED_GAME).flatMap((i) => i.tags))].sort();
-    if (!gameNames.includes(state.game)) state.game = "all";
+    if (!gameNames.includes(state.game)) state.game = gameNames[0];
     if (!typeNames.includes(state.type)) state.type = "all";
     $("updated").textContent = `last stitched ${ago(data.updated)}`;
     $("updated").title = new Date(data.updated).toLocaleString();

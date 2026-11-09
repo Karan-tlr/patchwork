@@ -57,7 +57,16 @@ main > * + * { margin-top: var(--space-3); }
   margin-inline: auto;
   padding: var(--space-3) var(--space-3) 0;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+}
+.site-title {
+  font-size: clamp(1.6rem, 1.3rem + 1.2vw, 2.1rem);
+  font-weight: 600;
+  font-variation-settings: "opsz" 40;
+  line-height: 1.2;
+  color: var(--color-fg);
 }
 
 .theme-toggle {
@@ -75,10 +84,6 @@ main > * + * { margin-top: var(--space-3); }
 .theme-toggle[aria-pressed="true"] .icon-moon { display: none; }
 .theme-toggle[aria-pressed="true"] .icon-sun { display: block; }
 
-/* ---- intro ---- */
-.intro { text-align: center; }
-.intro p { color: var(--color-fg-muted); font-style: italic; }
-.divider { width: 6rem; margin: var(--space-2) auto 0; color: var(--color-accent-2); }
 
 /* ---- filters: plain text links, the old-homepage way ---- */
 .filters {
