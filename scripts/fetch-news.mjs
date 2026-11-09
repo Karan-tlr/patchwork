@@ -7,7 +7,7 @@ import path from "node:path";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const config = JSON.parse(await readFile(path.join(root, "games.json"), "utf8"));
 const perGame = config.itemsPerGame ?? 20;
-const UA = "game-news-tracker (GitHub Pages static site)";
+const UA = "patchwork (GitHub Pages static site)";
 
 const decodeEntities = (s) =>
   s

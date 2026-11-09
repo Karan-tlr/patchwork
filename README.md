@@ -25,7 +25,7 @@ Commit and push; the site rebuilds automatically.
 ## One-time GitHub setup
 
 In the repo on GitHub: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
-After the first workflow run the site is at `https://<user>.github.io/game-news-tracker/`.
+After the first workflow run the site is at `https://karan-tlr.github.io/patchwork/`.
 To refresh right away: **Actions → Fetch news and deploy → Run workflow**.
 
 ## Run locally
